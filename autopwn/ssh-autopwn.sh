@@ -46,6 +46,9 @@ while IFS=',' read -r team_info ip_info; do
 
         if [[ $? -eq 0 ]]; then
             echo "Successfully uploaded $flag_file to $dns_name using $username"
+
+            # Create loot dir for team and host
+            mkdir -p "${LOOT_DIR}/team${team_number}/${$dns_name}"
             
             # Attempt to download any .flag files from the /etc/ directory
             echo "Downloading .flag files from $dns_name"

